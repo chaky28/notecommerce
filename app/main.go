@@ -12,5 +12,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/", home)
+
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
