@@ -46,8 +46,8 @@ func (ndb NotEcommerceDB) Db_v1() {
 	sql := `CREATE TABLE products 
 			(id varchar(36) PRIMARY KEY,
 			name varchar(128),
-			saleprice numeric,
-			price numeric,
+			saleprice decimal(128, 64),
+			price decimal(128, 64),
 			currency_id varchar(36),
 			offer_id varchar(36) DEFAULT NULL,
 			description varchar(512) DEFAULT NULL,
@@ -77,7 +77,7 @@ func (ndb NotEcommerceDB) Db_v1() {
 	sql = `CREATE TABLE offers
 		   (id varchar(36) PRIMARY KEY,
 		   name varchar(128),
-		   multiplier numeric
+		   multiplier decimal(128, 64)
 		   )`
 	if _, err := conn.Exec(sql); err != nil {
 		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
@@ -87,7 +87,7 @@ func (ndb NotEcommerceDB) Db_v1() {
 		   (id varchar(36) PRIMARY KEY,
 			card_id varchar(36),
 			amount int,
-			surcharge numeric
+			surcharge decimal(128, 64)
 		    )`
 	if _, err := conn.Exec(sql); err != nil {
 		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
