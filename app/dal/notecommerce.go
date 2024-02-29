@@ -3,9 +3,6 @@ package dal
 import (
 	"log"
 	"reflect"
-	"strings"
-
-	"github.com/chaky28/notecommerce/app/app/helpers"
 )
 
 // -------------------- DB constants --------------------
@@ -23,10 +20,6 @@ type NotEcommerceDB struct {
 
 func GetNotEcommerceDB() NotEcommerceDB {
 	user, passw := getDbCreds(PgCredsFilePath)
-	hostIp := DbHost
-	if strings.Contains(helpers.GetHostIp(), DbHost) {
-		hostIp = "localhost"
-	}
 
 	ndb := NotEcommerceDB{
 		db: DB{
@@ -37,7 +30,7 @@ func GetNotEcommerceDB() NotEcommerceDB {
 			version:  NotEcommerceDbVersion,
 			user:     user,
 			password: passw,
-			host:     hostIp,
+			host:     DbHost,
 		},
 	}
 
