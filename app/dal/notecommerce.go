@@ -37,6 +37,7 @@ func GetNotEcommerceDB() NotEcommerceDB {
 	checkVersioning(ndb.db, reflect.ValueOf(ndb))
 
 	return ndb
+
 }
 
 func (ndb NotEcommerceDB) Db_v1() {
