@@ -33,7 +33,6 @@ func GetNotEcommerceDB() NotEcommerceDB {
 			host:     DbHost,
 		},
 	}
-
 	//Update DB before returning the struct
 	checkVersioning(ndb.db, reflect.ValueOf(ndb))
 
