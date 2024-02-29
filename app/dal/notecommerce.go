@@ -24,7 +24,7 @@ func GetNotEcommerceDB() NotEcommerceDB {
 	user, passw := getDbCreds(PgCredsFilePath)
 	hostIp := DbHost
 	if helpers.IsRunningInDockerContainer() { //This has to be done since the db AND containerized application are running in the same host
-		hostIp = "localhost"
+		hostIp = "localdatabase"
 	}
 
 	ndb := NotEcommerceDB{
