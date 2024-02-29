@@ -3,8 +3,6 @@ package dal
 import (
 	"log"
 	"reflect"
-
-	"github.com/chaky28/notecommerce/app/app/helpers"
 )
 
 // -------------------- DB constants --------------------
@@ -22,10 +20,6 @@ type NotEcommerceDB struct {
 
 func GetNotEcommerceDB() NotEcommerceDB {
 	user, passw := getDbCreds(PgCredsFilePath)
-	hostIp := DbHost
-	if helpers.IsRunningInDockerContainer() { //This has to be done since the db AND containerized application are running in the same host
-		hostIp = "localdatabase"
-	}
 
 	ndb := NotEcommerceDB{
 		db: DB{
@@ -36,7 +30,7 @@ func GetNotEcommerceDB() NotEcommerceDB {
 			version:  NotEcommerceDbVersion,
 			user:     user,
 			password: passw,
-			host:     hostIp,
+			host:     DbHost,
 		},
 	}
 
