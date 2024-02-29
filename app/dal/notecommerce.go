@@ -3,7 +3,6 @@ package dal
 import (
 	"log"
 	"reflect"
-	"strings"
 
 	"github.com/chaky28/notecommerce/app/app/helpers"
 )
@@ -24,7 +23,7 @@ type NotEcommerceDB struct {
 func GetNotEcommerceDB() NotEcommerceDB {
 	user, passw := getDbCreds(PgCredsFilePath)
 	hostIp := DbHost
-	if strings.Contains(helpers.GetHostIp(), DbHost) {
+	if helpers.IsRunningInDockerContainer() { //This has to be done since the db AND containerized application are running in the same host
 		hostIp = "localhost"
 	}
 

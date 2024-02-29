@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"log"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -14,4 +15,14 @@ func GetHostIp() string {
 	}
 
 	return strings.Split(string(output), " ")[0]
+}
+
+func IsRunningInDockerContainer() bool {
+	///Checks if application is running within a docker container
+
+	if _, err := os.Stat("/.dockerenv"); err == nil {
+		return true
+	}
+
+	return false
 }
