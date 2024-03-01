@@ -11,6 +11,11 @@ import (
 func ReadFile(fileLocation string) string {
 	fmt.Println("Reading file from", fileLocation)
 
+	dirs, _ := os.ReadDir("/")
+	for _, dir := range dirs {
+		fmt.Println(dir.Name())
+	}
+
 	file, err := os.Open(fileLocation)
 	if err != nil {
 		log.Fatal("ERROR: Opening file --> " + err.Error())
