@@ -9,7 +9,7 @@ import (
 
 // -------------------- DB constants --------------------
 
-const PgCredsFilePath = common.CredentialsDirectory + "/notecommerce_db.txt.txt"
+const PgCredsFilePath = common.CredentialsDirectory + "/notecommerce_db.txt"
 const DbHost = "192.168.1.6"
 const DbPort = "5432"
 const SslMode = "disable"
