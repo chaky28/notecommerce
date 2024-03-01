@@ -15,5 +15,6 @@ func main() {
 
 	// ndb := dal.GetNotEcommerceDB()
 	// fmt.Println(ndb)
+
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
