@@ -3,11 +3,13 @@ package dal
 import (
 	"log"
 	"reflect"
+
+	"github.com/chaky28/notecommerce/app/app/common"
 )
 
 // -------------------- DB constants --------------------
 
-const PgCredsFilePath = "/notecommerce_db_creds.txt"
+const PgCredsFilePath = common.CredentialsDirectory + "/notecommerce_db_creds.txt"
 const DbHost = "192.168.1.6"
 const DbPort = "5432"
 const SslMode = "disable"
