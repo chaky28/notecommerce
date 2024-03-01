@@ -1,3 +1,3 @@
 package common
 
-const CredentialsDirectory = "/root_host/credentials"
+const CredentialsDirectory = "/host_directories/credentials"
