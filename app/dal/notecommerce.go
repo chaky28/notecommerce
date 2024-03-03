@@ -49,7 +49,7 @@ func (ndb NotEcommerceDB) Db_v2() {
 
 	sql := `CREATE TABLE users 
 		    (id varchar(36) PRIMARY KEY,
-			user varchar(128),
+			user_name varchar(128),
 			name_id varchar(36),
 			last_name_id varchar(36),
 			country_id varchar(36),
