@@ -14,7 +14,7 @@ const DbHost = "192.168.1.6"
 const DbPort = "5432"
 const SslMode = "disable"
 const DbName = "notecommerce"
-const NotEcommerceDbVersion = 1 //Change version HERE to update DB with versioning
+const NotEcommerceDbVersion = 2 //Change version HERE to update DB with versioning
 
 type NotEcommerceDB struct {
 	db DB
@@ -42,6 +42,87 @@ func GetNotEcommerceDB() NotEcommerceDB {
 	return ndb
 }
 
+// Create user related tables
+func (ndb NotEcommerceDB) Db_v2() {
+	conn := ndb.db.getDbConn()
+	defer conn.Close()
+
+	sql := `CREATE TABLE users 
+		    (id varchar(36) PRIMARY KEY,
+			user varchar(128),
+			name_id varchar(36),
+			last_name_id varchar(36),
+			country_id varchar(36),
+			pass_hash varchar(60),
+			datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT'),
+			)`
+	if _, err := conn.Exec(sql); err != nil {
+		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
+	}
+
+	sql = `CREATE TABLE names 
+		    (id varchar(36) PRIMARY KEY,
+			name varchar(128),
+			datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT'),
+			)`
+	if _, err := conn.Exec(sql); err != nil {
+		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
+	}
+
+	sql = `CREATE TABLE last_names 
+		    (id varchar(36) PRIMARY KEY,
+			last_name varchar(128),
+			datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT'),
+			)`
+	if _, err := conn.Exec(sql); err != nil {
+		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
+	}
+
+	sql = `CREATE TABLE favs 
+		   (id varchar(36) PRIMARY KEY,
+		   user_id varchar(36),
+		   product_id varchar(36),
+		   datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT'),
+		   )`
+	if _, err := conn.Exec(sql); err != nil {
+		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
+	}
+
+	sql = `CREATE TABLE notifications 
+		   (id varchar(36) PRIMARY KEY,
+		   user_id varchar(36),
+		   from_user_id varchar(36),
+		   type_id varchar(36),
+		   datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT'),
+		   )`
+	if _, err := conn.Exec(sql); err != nil {
+		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
+	}
+
+	sql = `CREATE TABLE notification_types 
+		   (id varchar(36) PRIMARY KEY,
+		   message varchar(128),
+		   datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT'),
+		   )`
+	if _, err := conn.Exec(sql); err != nil {
+		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
+	}
+
+	sql = `CREATE TABLE purchases 
+		   (id varchar(36),
+		   user_id varchar(36),
+		   product_id varchar(36),
+		   amount int,
+		   card_id varchar(36),
+		   instalments int,
+		   datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT'),
+		   )`
+	if _, err := conn.Exec(sql); err != nil {
+		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
+	}
+}
+
+// Product related tables creation
 func (ndb NotEcommerceDB) Db_v1() {
 	conn := ndb.db.getDbConn()
 	defer conn.Close()
@@ -62,7 +143,8 @@ func (ndb NotEcommerceDB) Db_v1() {
 			spec2_id varchar(36) NULL,
 			spec3_id varchar(36) NULL,
 			spec4_id varchar(36) NULL,
-			spec5_id varchar(36) NULL
+			spec5_id varchar(36) NULL,
+			datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT'),
 			)`
 	if _, err := conn.Exec(sql); err != nil {
 		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
@@ -71,7 +153,8 @@ func (ndb NotEcommerceDB) Db_v1() {
 	sql = `CREATE TABLE currency
 		   (id varchar(36) PRIMARY KEY,
 		   name varchar(128),
-		   symbol varchar(16)
+		   symbol varchar(16),
+		   datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT'),
 		   )`
 	if _, err := conn.Exec(sql); err != nil {
 		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
@@ -80,7 +163,8 @@ func (ndb NotEcommerceDB) Db_v1() {
 	sql = `CREATE TABLE offers
 		   (id varchar(36) PRIMARY KEY,
 		   name varchar(128),
-		   multiplier decimal(128, 64)
+		   multiplier decimal(128, 64),
+		   datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT'),
 		   )`
 	if _, err := conn.Exec(sql); err != nil {
 		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
@@ -90,7 +174,8 @@ func (ndb NotEcommerceDB) Db_v1() {
 		   (id varchar(36) PRIMARY KEY,
 			card_id varchar(36),
 			amount int,
-			surcharge decimal(128, 64)
+			surcharge decimal(128, 64),
+			datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT'),
 		    )`
 	if _, err := conn.Exec(sql); err != nil {
 		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
@@ -99,7 +184,8 @@ func (ndb NotEcommerceDB) Db_v1() {
 		   (id varchar(36) PRIMARY KEY,
 		   name varchar(128),
 		   bank_id varchar(36),
-		   institution_id varchar(36)
+		   institution_id varchar(36),
+		   datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT'),
 		   )`
 	if _, err := conn.Exec(sql); err != nil {
 		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
@@ -107,7 +193,8 @@ func (ndb NotEcommerceDB) Db_v1() {
 	sql = `CREATE TABLE banks
 		   (id varchar(36) PRIMARY KEY,
 		 	name varchar(128),
-			country_id varchar(36)
+			country_id varchar(36),
+			datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT'),
 		    )`
 	if _, err := conn.Exec(sql); err != nil {
 		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
@@ -115,7 +202,8 @@ func (ndb NotEcommerceDB) Db_v1() {
 
 	sql = `CREATE TABLE countries
 		   (id varchar(36) PRIMARY KEY,
-			name varchar(128)
+			name varchar(128),
+			datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT'),
 		    )`
 	if _, err := conn.Exec(sql); err != nil {
 		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
@@ -127,7 +215,8 @@ func (ndb NotEcommerceDB) Db_v1() {
 			lev2_category_id varchar(36),
 			lev3_category_id varchar(36) DEFAULT NULL,
 			lev4_category_id varchar(36) DEFAULT NULL,
-			lev5_category_id varchar(36) DEFAULT NULL
+			lev5_category_id varchar(36) DEFAULT NULL,
+			datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT'),
 		    )`
 	if _, err := conn.Exec(sql); err != nil {
 		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
@@ -135,7 +224,8 @@ func (ndb NotEcommerceDB) Db_v1() {
 
 	sql = `CREATE TABLE categories 
 		   (id varchar(36) PRIMARY KEY,
-			name varchar(128)
+			name varchar(128),
+			datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT'),
 		    )`
 	if _, err := conn.Exec(sql); err != nil {
 		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
@@ -143,7 +233,8 @@ func (ndb NotEcommerceDB) Db_v1() {
 
 	sql = `CREATE TABLE shipping 
 		   (id varchar(36) PRIMARY KEY,
-			name varchar(128)
+			name varchar(128),
+			datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT'),
 		    )`
 	if _, err := conn.Exec(sql); err != nil {
 		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
@@ -151,7 +242,8 @@ func (ndb NotEcommerceDB) Db_v1() {
 
 	sql = `CREATE TABLE specs 
 		   (id varchar(36) PRIMARY KEY,
-			name varchar(128)
+			name varchar(128),
+			datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT'),
 			)`
 	if _, err := conn.Exec(sql); err != nil {
 		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
