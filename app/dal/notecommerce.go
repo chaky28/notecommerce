@@ -144,7 +144,7 @@ func (ndb NotEcommerceDB) Db_v1() {
 			spec3_id varchar(36) NULL,
 			spec4_id varchar(36) NULL,
 			spec5_id varchar(36) NULL,
-			datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT'),
+			datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT')
 			)`
 	if _, err := conn.Exec(sql); err != nil {
 		log.Fatal("ERROR running query ", sql, " --> ", err.Error())
