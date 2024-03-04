@@ -14,7 +14,7 @@ const DbHost = "192.168.1.6"
 const DbPort = "5432"
 const SslMode = "disable"
 const DbName = "notecommerce"
-const NotEcommerceDbVersion = 2 //Change version HERE to update DB with versioning
+const NotEcommerceDbVersion = 3 //Change version HERE to update DB with versioning
 
 type NotEcommerceDB struct {
 	db DB
@@ -40,6 +40,81 @@ func GetNotEcommerceDB() NotEcommerceDB {
 	checkVersioning(ndb.db, reflect.ValueOf(ndb))
 
 	return ndb
+}
+
+func (ndb NotEcommerceDB) InsertNewProduct(pr Product) error {
+	conn := ndb.db.getDbConn()
+	defer conn.Close()
+
+	sql := `INSERT INTO products VALUES (
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+	)`
+	_, err := conn.Exec(sql, pr.Id, pr.Name, pr.Salesprice, pr.Price, pr.Currency_id, pr.Offer_id,
+		pr.Description, pr.Breadcrumb_id, pr.Shipping_id,
+		pr.Stock, pr.Spec1_id, pr.Spec2_id, pr.Spec3_id, pr.Spec4_id, pr.Spec5_id)
+
+	return err
+}
+
+func (ndb NotEcommerceDB) GetCurrencyIdByName(curr string) (string, error) {
+	conn := ndb.db.getDbConn()
+	defer conn.Close()
+
+	sql := `SELECT id FROM currency WHERE name = ?`
+	row := conn.QueryRow(sql, curr)
+
+	var id string
+	err := row.Scan(&id)
+
+	return id, err
+}
+
+func (ndb NotEcommerceDB) GetOfferIdByName(offer string) (string, error) {
+	conn := ndb.db.getDbConn()
+	defer conn.Close()
+
+	sql := `SELECT id FROM offers WHERE name = ?`
+	row := conn.QueryRow(sql, offer)
+
+	var id string
+	err := row.Scan(&id)
+
+	return id, err
+}
+
+func (ndb NotEcommerceDB) GetProductInstalments(productId string) ([]Instalment, error) {
+	conn := ndb.db.getDbConn()
+	defer conn.Close()
+
+	sql := `SELECT instalment_id FROM product_instalments WHERE product_id = $1`
+	piRows, err := conn.Query(sql, productId)
+
+	result := []Instalment{}
+	for piRows.Next() {
+		var instalmentId string
+		piRows.Scan(&instalmentId)
+
+		sql = "SELECT * FROM instalments WHERE id = $1"
+		iRows := conn.QueryRow(sql, instalmentId)
+
+		var ins Instalment
+		err = iRows.Scan(&ins.Id, &ins.Card_id, &ins.Amount, &ins.Surcharge, &ins.Datetime)
+		result = append(result, ins)
+	}
+
+	return result, err
+}
+
+func (ndb NotEcommerceDB) Db_v3() {
+	conn := ndb.db.getDbConn()
+	defer conn.Close()
+
+	sql := `CREATE TABLE product_instalments (
+			id varchar(36) PRIMARY KEY,
+			product_id varchar(36),
+			instalment_id varchar(36)
+			)`
+	conn.Exec(sql)
 }
 
 // Create user related tables
