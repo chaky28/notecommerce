@@ -47,39 +47,54 @@ func (ndb NotEcommerceDB) InsertNewProduct(pr Product) error {
 	defer conn.Close()
 
 	sql := `INSERT INTO products VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
 	)`
-	_, err := conn.Exec(sql, pr.Id, pr.Name, pr.Salesprice, pr.Price, pr.Currency_id, pr.Offer_id,
-		pr.Description, pr.Breadcrumb_id, pr.Shipping_id,
-		pr.Stock, pr.Spec1_id, pr.Spec2_id, pr.Spec3_id, pr.Spec4_id, pr.Spec5_id)
+	_, err := conn.Exec(sql, pr.Id, pr.Name, pr.Salesprice, pr.Price, pr.CurrencyId, pr.OfferId,
+		pr.Description, pr.InstalmentId, pr.BreadcrumbId, pr.ShippingId,
+		pr.Stock, pr.Spec1Id, pr.Spec2Id, pr.Spec3Id, pr.Spec4Id, pr.Spec5Id, pr.Datetime)
 
 	return err
 }
 
-func (ndb NotEcommerceDB) GetCurrencyIdByName(curr string) (string, error) {
+// ------------------------------- Selections -------------------------------
+
+func (ndb NotEcommerceDB) GetInstalmentById(id string) (Instalment, error) {
 	conn := ndb.db.getDbConn()
 	defer conn.Close()
 
-	sql := `SELECT id FROM currency WHERE name = ?`
-	row := conn.QueryRow(sql, curr)
+	sql := `SELECT * FROM currency WHERE id = ?`
+	row := conn.QueryRow(sql, id)
 
-	var id string
-	err := row.Scan(&id)
+	var inst Instalment
+	err := row.Scan(&inst.Id, &inst.CardId, &inst.Amount, &inst.Surcharge, &inst.Datetime)
 
-	return id, err
+	return inst, err
 }
 
-func (ndb NotEcommerceDB) GetOfferIdByName(offer string) (string, error) {
+func (ndb NotEcommerceDB) GetCurrencyById(id string) (Currency, error) {
 	conn := ndb.db.getDbConn()
 	defer conn.Close()
 
-	sql := `SELECT id FROM offers WHERE name = ?`
-	row := conn.QueryRow(sql, offer)
+	sql := `SELECT * FROM currency WHERE id = ?`
+	row := conn.QueryRow(sql, id)
 
-	var id string
-	err := row.Scan(&id)
+	var curr Currency
+	err := row.Scan(&curr.Id, &curr.Name, &curr.Symbol, &curr.Datetime)
 
-	return id, err
+	return curr, err
+}
+
+func (ndb NotEcommerceDB) GetOfferById(id string) (Offer, error) {
+	conn := ndb.db.getDbConn()
+	defer conn.Close()
+
+	sql := `SELECT * FROM offers WHERE id = ?`
+	row := conn.QueryRow(sql, id)
+
+	var offer Offer
+	err := row.Scan(&offer.Id, &offer.Name, &offer.Multiplier, &offer.Datetime)
+
+	return offer, err
 }
 
 func (ndb NotEcommerceDB) GetProductInstalments(productId string) ([]Instalment, error) {
@@ -98,12 +113,115 @@ func (ndb NotEcommerceDB) GetProductInstalments(productId string) ([]Instalment,
 		iRows := conn.QueryRow(sql, instalmentId)
 
 		var ins Instalment
-		err = iRows.Scan(&ins.Id, &ins.Card_id, &ins.Amount, &ins.Surcharge, &ins.Datetime)
+		err = iRows.Scan(&ins.Id, &ins.CardId, &ins.Amount, &ins.Surcharge, &ins.Datetime)
 		result = append(result, ins)
 	}
 
 	return result, err
 }
+
+func (ndb NotEcommerceDB) GetBreadcrumbById(id string) (Breadcrumb, error) {
+	conn := ndb.db.getDbConn()
+	defer conn.Close()
+
+	sql := `SELECT * FROM breadcrumbs WHERE id = ?`
+	row := conn.QueryRow(sql, id)
+
+	var bc Breadcrumb
+	err := row.Scan(&bc.Id, &bc.L1, &bc.L2, &bc.L3, &bc.L4, &bc.L5, &bc.Datetime)
+
+	return bc, err
+}
+
+func (ndb NotEcommerceDB) GetShippingById(id string) (Shipping, error) {
+	conn := ndb.db.getDbConn()
+	defer conn.Close()
+
+	sql := `SELECT * FROM shipping WHERE id = ?`
+	row := conn.QueryRow(sql, id)
+
+	var sh Shipping
+	err := row.Scan(&sh.Id, &sh.Name, &sh.Datetime)
+
+	return sh, err
+}
+
+func (ndb NotEcommerceDB) GetProductSpecById(id string) (Spec, error) {
+	conn := ndb.db.getDbConn()
+	defer conn.Close()
+
+	sql := `SELECT * FROM shipping WHERE id = ?`
+	row := conn.QueryRow(sql, id)
+
+	var spec Spec
+	err := row.Scan(&spec.Id, &spec.Name, &spec.Datetime)
+
+	return spec, err
+}
+
+// ------------------------------- Insertions -------------------------------
+
+func (ndb NotEcommerceDB) InsertInstalment(inst Instalment) error {
+	conn := ndb.db.getDbConn()
+	defer conn.Close()
+
+	sql := "INSERT INTO instalments VALUES ($1, $2, $3, $4, $5)"
+	_, err := conn.Exec(sql, inst.Id, inst.CardId, inst.Amount, inst.Surcharge, inst.Datetime)
+
+	return err
+}
+
+func (ndb NotEcommerceDB) InsertCurrency(curr Currency) error {
+	conn := ndb.db.getDbConn()
+	defer conn.Close()
+
+	sql := "INSERT INTO currency VALUES ($1, $2, $3, $4)"
+	_, err := conn.Exec(sql, curr.Id, curr.Name, curr.Symbol, curr.Datetime)
+
+	return err
+}
+
+func (ndb NotEcommerceDB) InsertOffer(offer Offer) error {
+	conn := ndb.db.getDbConn()
+	defer conn.Close()
+
+	sql := "INSERT INTO offers VALUES ($1, $2, $3, $4)"
+	_, err := conn.Exec(sql, offer.Id, offer.Name, offer.Multiplier, offer.Datetime)
+
+	return err
+}
+
+func (ndb NotEcommerceDB) InsertBreadcrumb(bc Breadcrumb) error {
+	conn := ndb.db.getDbConn()
+	defer conn.Close()
+
+	sql := "INSERT INTO offers VALUES ($1, $2, $3, $4, $5, $6, $7)"
+	_, err := conn.Exec(sql, bc.Id, bc.L1, bc.L2, bc.L3, bc.L4, bc.L5, bc.Datetime)
+
+	return err
+}
+
+func (ndb NotEcommerceDB) InsertShipping(sh Shipping) error {
+	conn := ndb.db.getDbConn()
+	defer conn.Close()
+
+	sql := "INSERT INTO shipping VALUES ($1, $2, $3)"
+	_, err := conn.Exec(sql, sh.Id, sh.Name, sh.Datetime)
+
+	return err
+}
+
+func (ndb NotEcommerceDB) InsertSpec(spec Spec) error {
+	conn := ndb.db.getDbConn()
+	defer conn.Close()
+
+	sql := "INSERT INTO specs VALUES ($1, $2, $3)"
+	_, err := conn.Exec(sql, spec.Id, spec.Name, spec.Datetime)
+
+	return err
+}
+
+// ------------------------------- Versioning -------------------------------
 
 func (ndb NotEcommerceDB) Db_v3() {
 	conn := ndb.db.getDbConn()
