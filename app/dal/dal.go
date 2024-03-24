@@ -114,3 +114,5 @@ func (db DB) Db_v0() {
 		log.Fatal("ERROR: Executing v0 versioning function --> ", err.Error())
 	}
 }
+
+// -------------------- Helper functions --------------------

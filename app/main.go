@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
-	"github.com/chaky28/notecommerce/app/app/dal"
+	"github.com/chaky28/notecommerce/app/app/api"
+	"github.com/chaky28/notecommerce/app/app/server"
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
@@ -13,9 +13,16 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", home)
+	//Initialize server
+	s := server.Server{
+		Port: 8080,
+	}
 
-	ndb := dal.GetNotEcommerceDB()
-	fmt.Println(ndb)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	// Register handler blueprints
+	bps := []server.BluePrint{
+		api.GetHandlers(),
+	}
+
+	//Start server
+	s.ListenAndServe(bps)
 }

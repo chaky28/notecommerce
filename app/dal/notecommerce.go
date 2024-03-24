@@ -10,7 +10,7 @@ import (
 // -------------------- DB constants --------------------
 
 const PgCredsFilePath = common.CredentialsDirectory + "/notecommerce_db.txt"
-const DbHost = "192.168.1.6"
+const DbHost = "192.168.1.17"
 const DbPort = "5432"
 const SslMode = "disable"
 const DbName = "notecommerce"
@@ -56,7 +56,54 @@ func (ndb NotEcommerceDB) InsertNewProduct(pr Product) error {
 	return err
 }
 
+// ------------------------------- Updates -------------------------------
+
+func (ndb NotEcommerceDB) UpdateStock(productId string, newStock int) error {
+	conn := ndb.db.getDbConn()
+	defer conn.Close()
+
+	sql := "UPDATE products SET stock = $1 WHERE id = $2"
+	_, err := conn.Exec(sql, productId, newStock)
+
+	return err
+}
+
 // ------------------------------- Selections -------------------------------
+
+func (ndb NotEcommerceDB) GetProductsByCatId(catId string) ([]Product, error) {
+	conn := ndb.db.getDbConn()
+	defer conn.Close()
+
+	sql := `SELECT pr.* FROM products 
+			pr JOIN breadcrumbs br 
+			ON pr.breadcrumb_id = br.id WHERE 
+			br.lev1_category_id = $1 OR
+			br.lev2_category_id = $2 OR
+			br.lev3_category_id = $3 OR
+			br.lev4_category_id = $4 OR
+			br.lev5_category_id = $5
+			GROUP BY pr.id`
+
+	rows, err := conn.Query(sql, catId, catId, catId, catId, catId)
+	if err != nil {
+		return nil, err
+	}
+
+	prods := []Product{}
+	for rows.Next() {
+		var pr Product
+		err = rows.Scan(&pr.Id, &pr.Name, &pr.Salesprice, &pr.Price, &pr.CurrencyId, &pr.OfferId,
+			&pr.Description, &pr.InstalmentId, &pr.BreadcrumbId, &pr.ShippingId,
+			&pr.Stock, &pr.Spec1Id, &pr.Spec2Id, &pr.Spec3Id, &pr.Spec4Id, &pr.Spec5Id, &pr.Datetime)
+
+		if err != nil {
+			return prods, err
+		}
+
+		prods = append(prods, pr)
+	}
+	return prods, nil
+}
 
 func (ndb NotEcommerceDB) GetInstalmentById(id string) (Instalment, error) {
 	conn := ndb.db.getDbConn()
