@@ -24,6 +24,28 @@ type Product struct {
 	Datetime     time.Time
 }
 
+func (p Product) GetColumns() []string {
+	return []string{
+		"Id",
+		"Name",
+		"Salesprice",
+		"Price",
+		"CurrencyId",
+		"OfferId",
+		"Description",
+		"InstalmentId",
+		"BreadcrumbId",
+		"ShippingId",
+		"Stock",
+		"Spec1Id",
+		"Spec2Id",
+		"Spec3Id",
+		"Spec4Id",
+		"Spec5Id",
+		"Datetime",
+	}
+}
+
 type Instalment struct {
 	Id        string
 	CardId    string
@@ -32,10 +54,28 @@ type Instalment struct {
 	Datetime  time.Time
 }
 
+func (ins Instalment) GetColumns() []string {
+	return []string{
+		"Id",
+		"CardId",
+		"Amount",
+		"Surcharge",
+		"Datetime",
+	}
+}
+
 type ProductInstalments struct {
 	Id           string
 	ProductId    string
 	InstalmentId string
+}
+
+func (pi ProductInstalments) GetColumns() []string {
+	return []string{
+		"Id",
+		"ProductId",
+		"InstalmentId",
+	}
 }
 
 type Currency struct {
@@ -45,11 +85,29 @@ type Currency struct {
 	Datetime time.Time
 }
 
+func (curr Currency) GetColumns() []string {
+	return []string{
+		"Id",
+		"Name",
+		"Symbol",
+		"Datetime",
+	}
+}
+
 type Offer struct {
 	Id         string
 	Name       string
 	Multiplier string
 	Datetime   time.Time
+}
+
+func (off Offer) GetColumns() []string {
+	return []string{
+		"Id",
+		"Name",
+		"Multiplier",
+		"Datetime",
+	}
 }
 
 type Breadcrumb struct {
@@ -62,14 +120,42 @@ type Breadcrumb struct {
 	Datetime time.Time
 }
 
+func (br Breadcrumb) GetColumns() []string {
+	return []string{
+		"Id",
+		"L1",
+		"L2",
+		"L3",
+		"L4",
+		"L5",
+		"Datetime",
+	}
+}
+
 type Shipping struct {
 	Id       string
 	Name     string
 	Datetime time.Time
 }
 
+func (sh Shipping) GetColumns() []string {
+	return []string{
+		"Id",
+		"Name",
+		"Datetime",
+	}
+}
+
 type Spec struct {
 	Id       string
 	Name     string
 	Datetime time.Time
+}
+
+func (sp Spec) GetColumns() []string {
+	return []string{
+		"Id",
+		"Name",
+		"Datetime",
+	}
 }

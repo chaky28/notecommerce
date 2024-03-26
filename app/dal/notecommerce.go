@@ -10,8 +10,8 @@ import (
 // -------------------- DB constants --------------------
 
 const PgCredsFilePath = common.CredentialsDirectory + "/notecommerce_db.txt"
-const DbHost = "192.168.1.17"
-const DbPort = "5432"
+const DbHost = "127.0.0.1" //localhost
+const DbPort = "5433"
 const SslMode = "disable"
 const DbName = "notecommerce"
 const NotEcommerceDbVersion = 3 //Change version HERE to update DB with versioning
@@ -40,20 +40,6 @@ func GetNotEcommerceDB() NotEcommerceDB {
 	checkVersioning(ndb.db, reflect.ValueOf(ndb))
 
 	return ndb
-}
-
-func (ndb NotEcommerceDB) InsertNewProduct(pr Product) error {
-	conn := ndb.db.getDbConn()
-	defer conn.Close()
-
-	sql := `INSERT INTO products VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
-	)`
-	_, err := conn.Exec(sql, pr.Id, pr.Name, pr.Salesprice, pr.Price, pr.CurrencyId, pr.OfferId,
-		pr.Description, pr.InstalmentId, pr.BreadcrumbId, pr.ShippingId,
-		pr.Stock, pr.Spec1Id, pr.Spec2Id, pr.Spec3Id, pr.Spec4Id, pr.Spec5Id, pr.Datetime)
-
-	return err
 }
 
 // ------------------------------- Updates -------------------------------
@@ -105,7 +91,7 @@ func (ndb NotEcommerceDB) GetProductsByCatId(catId string) ([]Product, error) {
 	return prods, nil
 }
 
-func (ndb NotEcommerceDB) GetInstalmentById(id string) (Instalment, error) {
+func (ndb NotEcommerceDB) GetInstalmentById(id string) ([]Instalment, error) {
 	conn := ndb.db.getDbConn()
 	defer conn.Close()
 
@@ -115,10 +101,10 @@ func (ndb NotEcommerceDB) GetInstalmentById(id string) (Instalment, error) {
 	var inst Instalment
 	err := row.Scan(&inst.Id, &inst.CardId, &inst.Amount, &inst.Surcharge, &inst.Datetime)
 
-	return inst, err
+	return []Instalment{inst}, err
 }
 
-func (ndb NotEcommerceDB) GetCurrencyById(id string) (Currency, error) {
+func (ndb NotEcommerceDB) GetCurrencyById(id string) ([]Currency, error) {
 	conn := ndb.db.getDbConn()
 	defer conn.Close()
 
@@ -128,10 +114,10 @@ func (ndb NotEcommerceDB) GetCurrencyById(id string) (Currency, error) {
 	var curr Currency
 	err := row.Scan(&curr.Id, &curr.Name, &curr.Symbol, &curr.Datetime)
 
-	return curr, err
+	return []Currency{curr}, err
 }
 
-func (ndb NotEcommerceDB) GetOfferById(id string) (Offer, error) {
+func (ndb NotEcommerceDB) GetOfferById(id string) ([]Offer, error) {
 	conn := ndb.db.getDbConn()
 	defer conn.Close()
 
@@ -141,7 +127,7 @@ func (ndb NotEcommerceDB) GetOfferById(id string) (Offer, error) {
 	var offer Offer
 	err := row.Scan(&offer.Id, &offer.Name, &offer.Multiplier, &offer.Datetime)
 
-	return offer, err
+	return []Offer{offer}, err
 }
 
 func (ndb NotEcommerceDB) GetProductInstalments(productId string) ([]Instalment, error) {
@@ -167,7 +153,7 @@ func (ndb NotEcommerceDB) GetProductInstalments(productId string) ([]Instalment,
 	return result, err
 }
 
-func (ndb NotEcommerceDB) GetBreadcrumbById(id string) (Breadcrumb, error) {
+func (ndb NotEcommerceDB) GetBreadcrumbById(id string) ([]Breadcrumb, error) {
 	conn := ndb.db.getDbConn()
 	defer conn.Close()
 
@@ -177,10 +163,10 @@ func (ndb NotEcommerceDB) GetBreadcrumbById(id string) (Breadcrumb, error) {
 	var bc Breadcrumb
 	err := row.Scan(&bc.Id, &bc.L1, &bc.L2, &bc.L3, &bc.L4, &bc.L5, &bc.Datetime)
 
-	return bc, err
+	return []Breadcrumb{bc}, err
 }
 
-func (ndb NotEcommerceDB) GetShippingById(id string) (Shipping, error) {
+func (ndb NotEcommerceDB) GetShippingById(id string) ([]Shipping, error) {
 	conn := ndb.db.getDbConn()
 	defer conn.Close()
 
@@ -190,23 +176,37 @@ func (ndb NotEcommerceDB) GetShippingById(id string) (Shipping, error) {
 	var sh Shipping
 	err := row.Scan(&sh.Id, &sh.Name, &sh.Datetime)
 
-	return sh, err
+	return []Shipping{sh}, err
 }
 
-func (ndb NotEcommerceDB) GetProductSpecById(id string) (Spec, error) {
+func (ndb NotEcommerceDB) GetProductSpecById(id string) ([]Spec, error) {
 	conn := ndb.db.getDbConn()
 	defer conn.Close()
 
-	sql := `SELECT * FROM shipping WHERE id = ?`
+	sql := `SELECT * FROM specs WHERE id = ?`
 	row := conn.QueryRow(sql, id)
 
 	var spec Spec
 	err := row.Scan(&spec.Id, &spec.Name, &spec.Datetime)
 
-	return spec, err
+	return []Spec{spec}, err
 }
 
 // ------------------------------- Insertions -------------------------------
+
+func (ndb NotEcommerceDB) InsertProduct(pr Product) error {
+	conn := ndb.db.getDbConn()
+	defer conn.Close()
+
+	sql := `INSERT INTO products VALUES (
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
+	)`
+	_, err := conn.Exec(sql, pr.Id, pr.Name, pr.Salesprice, pr.Price, pr.CurrencyId, pr.OfferId,
+		pr.Description, pr.InstalmentId, pr.BreadcrumbId, pr.ShippingId,
+		pr.Stock, pr.Spec1Id, pr.Spec2Id, pr.Spec3Id, pr.Spec4Id, pr.Spec5Id)
+
+	return err
+}
 
 func (ndb NotEcommerceDB) InsertInstalment(inst Instalment) error {
 	conn := ndb.db.getDbConn()
@@ -370,8 +370,8 @@ func (ndb NotEcommerceDB) Db_v1() {
 	sql := `CREATE TABLE products 
 			(id varchar(36) PRIMARY KEY,
 			name varchar(128),
-			saleprice decimal(128, 64),
-			price decimal(128, 64),
+			saleprice decimal(32, 3),
+			price decimal(32, 3),
 			currency_id varchar(36),
 			offer_id varchar(36) DEFAULT NULL,
 			description varchar(512) DEFAULT NULL,
@@ -403,7 +403,7 @@ func (ndb NotEcommerceDB) Db_v1() {
 	sql = `CREATE TABLE offers
 		   (id varchar(36) PRIMARY KEY,
 		   name varchar(128),
-		   multiplier decimal(128, 64),
+		   multiplier decimal(32, 3),
 		   datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT')
 		   )`
 	if _, err := conn.Exec(sql); err != nil {
@@ -414,7 +414,7 @@ func (ndb NotEcommerceDB) Db_v1() {
 		   (id varchar(36) PRIMARY KEY,
 			card_id varchar(36),
 			amount int,
-			surcharge decimal(128, 64),
+			surcharge decimal(32, 3),
 			datetime timestamp without time zone NOT NULL DEFAULT (current_timestamp AT TIME ZONE 'ADT')
 		    )`
 	if _, err := conn.Exec(sql); err != nil {

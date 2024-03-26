@@ -38,7 +38,7 @@ func (db DB) getDbConn() *sql.DB {
 	return conn
 }
 
-// -------------------- DB versioning --------------------
+// ------------------------------- DB versioning -------------------------------
 
 func checkVersioning(db DB, reflectValue reflect.Value) {
 	conn := db.getDbConn()
@@ -56,7 +56,6 @@ func checkVersioning(db DB, reflectValue reflect.Value) {
 		f.Call(nil)
 		db.updateDbVersioning(currentDbVersion)
 	}
-
 }
 
 func (db DB) updateDbVersioning(version int) {
@@ -115,4 +114,4 @@ func (db DB) Db_v0() {
 	}
 }
 
-// -------------------- Helper functions --------------------
+// ------------------------------- Helper functions -------------------------------

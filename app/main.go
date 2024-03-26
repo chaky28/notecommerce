@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/chaky28/notecommerce/app/app/api"
+	"github.com/chaky28/notecommerce/app/app/dal"
 	"github.com/chaky28/notecommerce/app/app/server"
 )
 
@@ -13,6 +14,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	db := dal.GetNotEcommerceDB()
+	fmt.Println(db)
+
 	//Initialize server
 	s := server.Server{
 		Port: 8080,

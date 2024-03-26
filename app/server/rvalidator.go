@@ -5,9 +5,15 @@ import (
 	"net/http"
 )
 
+type Header struct {
+	Name  string
+	Value string
+}
+
 type ValidRequest struct {
-	Method string
-	Params []string
+	Method  string
+	Params  []string
+	Headers []Header
 }
 
 func ValidateRequest(w http.ResponseWriter, r *http.Request, vr ValidRequest) error {
@@ -16,6 +22,20 @@ func ValidateRequest(w http.ResponseWriter, r *http.Request, vr ValidRequest) er
 	}
 	if err := validateParams(w, r, vr.Params); err != nil {
 		return err
+	}
+	if err := validateHeaders(w, r, vr.Headers); err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateHeaders(w http.ResponseWriter, r *http.Request, headers []Header) error {
+	for _, header := range headers {
+		if r.Header.Get(header.Name) != header.Value {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("ERROR: " + header.Name + " header mismatch"))
+			return errors.New("header mismatch")
+		}
 	}
 	return nil
 }
