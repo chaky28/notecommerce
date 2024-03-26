@@ -17,11 +17,15 @@ func GetHandlers() server.BluePrint {
 	bp.AddHandler("/products/list", getProducts)
 	bp.AddHandler("/instalments/list", getInstalments)
 	bp.AddHandler("/currencies/list", getCurrencies)
+	bp.AddHandler("/offers/list", getOffers)
+	bp.AddHandler("/breadcrumbs/list", getBreadcrumb)
 
 	// ---------- PUT handle functions ----------
 	bp.AddHandler("/products/insert", insertProducts)
 	bp.AddHandler("/instalments/insert", insertInstalment)
 	bp.AddHandler("currencies/insert", insertCurrency)
+	bp.AddHandler("offers/insert", insertOffer)
+	bp.AddHandler("breadcrumbs/insert", insertOffer)
 
 	// ---------- POST handle functions ----------
 
@@ -117,6 +121,66 @@ func getCurrencies(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("ERROR: transforming currency to json"))
+	}
+
+	w.Write(json)
+}
+
+func getOffers(w http.ResponseWriter, r *http.Request) {
+	validRequest := server.ValidRequest{
+		Method: "GET",
+		Params: []string{"offer"},
+	}
+	if err := server.ValidateRequest(w, r, validRequest); err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	db := dal.GetNotEcommerceDB()
+
+	currency, err := db.GetOfferById(r.URL.Query().Get("offer"))
+	if err != nil {
+		fmt.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("ERROR: getting offer"))
+		return
+	}
+
+	json, err := json.Marshal(currency)
+	if err != nil {
+		fmt.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("ERROR: transforming offer to json"))
+	}
+
+	w.Write(json)
+}
+
+func getBreadcrumb(w http.ResponseWriter, r *http.Request) {
+	validRequest := server.ValidRequest{
+		Method: "GET",
+		Params: []string{"breadcrumb"},
+	}
+	if err := server.ValidateRequest(w, r, validRequest); err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	db := dal.GetNotEcommerceDB()
+
+	currency, err := db.GetBreadcrumbById(r.URL.Query().Get("breadcrumb"))
+	if err != nil {
+		fmt.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("ERROR: getting breadcrumb"))
+		return
+	}
+
+	json, err := json.Marshal(currency)
+	if err != nil {
+		fmt.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("ERROR: transforming breadcrumb to json"))
 	}
 
 	w.Write(json)
@@ -221,6 +285,74 @@ func insertCurrency(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("ERROR: inserting new currency"))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
+}
+
+func insertOffer(w http.ResponseWriter, r *http.Request) {
+	validRequest := server.ValidRequest{
+		Method: "PUT",
+		Headers: []server.Header{
+			{Name: "content-type", Value: "application/json"},
+		},
+	}
+	if err := server.ValidateRequest(w, r, validRequest); err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	var js dal.Offer
+
+	err := json.NewDecoder(r.Body).Decode(&js)
+	if err != nil {
+		fmt.Println(err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("ERROR: converting json. Bad format?"))
+		return
+	}
+
+	conn := dal.GetNotEcommerceDB()
+	err = conn.InsertOffer(js)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("ERROR: inserting new offer"))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
+}
+
+func insertBreadcrumb(w http.ResponseWriter, r *http.Request) {
+	validRequest := server.ValidRequest{
+		Method: "PUT",
+		Headers: []server.Header{
+			{Name: "content-type", Value: "application/json"},
+		},
+	}
+	if err := server.ValidateRequest(w, r, validRequest); err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	var js dal.Breadcrumb
+
+	err := json.NewDecoder(r.Body).Decode(&js)
+	if err != nil {
+		fmt.Println(err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("ERROR: converting json. Bad format?"))
+		return
+	}
+
+	conn := dal.GetNotEcommerceDB()
+	err = conn.InsertBreadcrumb(js)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("ERROR: inserting new breadcrumb"))
 		return
 	}
 
